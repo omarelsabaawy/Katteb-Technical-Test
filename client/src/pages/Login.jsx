@@ -9,12 +9,13 @@ import { loginRoute } from "../utils/APIRoutes";
 export default function Login() {
   const navigate = useNavigate();
   const [values, setValues] = useState({ username: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
     pauseOnHover: true,
     draggable: true,
-    theme: "dark",
+    theme: "light",
   };
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
@@ -29,9 +30,11 @@ export default function Login() {
   const validateForm = () => {
     const { username, password } = values;
     if (username === "") {
+      setLoading(false);
       toast.error("Email and Password are required.", toastOptions);
       return false;
     } else if (password === "") {
+      setLoading(false);
       toast.error("Email and Password are required.", toastOptions);
       return false;
     }
@@ -40,6 +43,7 @@ export default function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
     if (validateForm()) {
       const { username, password } = values;
       const { data } = await axios.post(loginRoute, {
@@ -47,6 +51,7 @@ export default function Login() {
         password,
       });
       if (data.status === false) {
+        setLoading(false);
         toast.error(data.msg, toastOptions);
       }
       if (data.status === true) {
@@ -58,6 +63,7 @@ export default function Login() {
           "token",
           JSON.stringify(data.token)
         );
+        setLoading(false);
         navigate("/chats");
       }
     }
@@ -83,7 +89,7 @@ export default function Login() {
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Log In</button>
+          <button type="submit">{loading ? "loading..." : "Log in"}</button>
           <span>
             Don't have an account ? <Link to="/register">Create One.</Link>
           </span>

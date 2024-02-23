@@ -13,7 +13,7 @@ export default function Register() {
     autoClose: 8000,
     pauseOnHover: true,
     draggable: true,
-    theme: "dark",
+    theme: "light",
   };
   const [values, setValues] = useState({
     username: "",
@@ -21,6 +21,7 @@ export default function Register() {
     role: "user",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
@@ -39,10 +40,12 @@ export default function Register() {
         "Username should be greater than 3 characters.",
         toastOptions
       );
+      setLoading(false);
       return false;
     }
     else if (email === "" || !email.includes('@')) {
       toast.error("Valid email is required.", toastOptions);
+      setLoading(false);
       return false;
     }
     else if (password.length < 8) {
@@ -50,14 +53,15 @@ export default function Register() {
         "Password should be equal or greater than 8 characters.",
         toastOptions
       );
+      setLoading(false);
       return false;
     }
-
     return true;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
     if (handleValidation()) {
       const { email, username, role, password } = values;
       const { data } = await axios.post(registerRoute, {
@@ -68,6 +72,7 @@ export default function Register() {
       });
       if (data.status === false) {
         toast.error(data.msg, toastOptions);
+        setLoading(false);
       }
       if (data.status === true) {
         localStorage.setItem(
@@ -78,6 +83,7 @@ export default function Register() {
           "token",
           JSON.stringify(data.token)
         );
+        setLoading(false);
         navigate("/chats");
       }
     }
@@ -112,7 +118,7 @@ export default function Register() {
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Create User</button>
+          <button type="submit">{loading ? "loading..." : "Create User"}</button>
           <span>
             Already have an account ? <Link to="/login">Login.</Link>
           </span>
